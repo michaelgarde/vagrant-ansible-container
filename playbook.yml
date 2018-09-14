@@ -1,0 +1,61 @@
+---
+
+- hosts: all
+  vars: 
+    venv: ~/ansible-container-env
+    post_install: |
+        - ssh to vagrant container using i.e. 'vagrant ssh'
+        - 'cd ansible-container-env/bin'
+        - Activate the virtualenv: 'source activate'
+        - Launch Ansible Container: 'ansible-container':
+        usage: ansible-container [-h] [--debug] [--devel] [--engine ENGINE_NAME]
+                         [--project-path BASE_PATH]
+                         [--project-name PROJECT_NAME]
+                         [--vars-files VARS_FILES] [--no-selinux]
+                         [--config-file CONFIG_FILE]
+
+                         {run,help,deploy,stop,destroy,restart,init,version,build,install,push,import}
+                         ...
+  tasks:
+    - name: Install pip and git
+      block:
+        - name: Install EPEL repository
+          yum: 
+            name: epel-release
+            state: latest
+        
+        - name: Install git
+          yum:
+            name: git
+            state: latest
+        - name: Install python pip
+          yum: 
+            name: python-pip
+            state: latest
+
+        - name: Install Python Virtual Environment
+          yum:
+            name: python-virtualenv
+            state: latest
+      become: yes
+
+    # As of 12-09-2018 master has an issue in setup.py with pip.req due to pip version > 10.
+    # This has been fixed in develop branch
+    - name: Install Ansible Container
+      block:
+        - name: Git clone Ansible Container develop repository
+          git:
+            repo: https://github.com/ansible/ansible-container.git
+            dest: ~/ansible-container
+            version: develop
+
+        - name: Install Ansible Container from local git clone
+          pip:
+            name: ~/ansible-container
+            state: latest
+            virtualenv: "{{ venv }}"
+            virtualenv_python: python
+        
+        - name: How to run ansible container
+          debug: 
+            msg: "{{ post_install.split('\n') }}"
