@@ -14,9 +14,16 @@ end
 
 Thus Ansible is not required. This vagrantfile playbook will install Ansible on the Vagrant VM, push the playbook to the VM and run the playbook.
 
+
+
 # Prerequisits
 
-Install [Vagrant](https://www.vagrantup.com/).
+* Install [Vagrant](https://www.vagrantup.com/).
+* Edit the vagrantfile to define a mount from a local folder to a remote folder:
+	```yaml
+	config.vm.synced_folder "{{LOCAL FOLDER}}", "{{REMOTE FOLDER}}"
+	```
+
 
 # Preparing the VM
 
